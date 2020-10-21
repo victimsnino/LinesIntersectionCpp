@@ -13,7 +13,8 @@ public:
 
     Type GetMinimumAndPop();
 
-    std::string AsString();
+    template<typename Type, size_t D>
+    friend std::string AsString(const dheap<Type, D>& heap);
 private:
     void Emersion(size_t index);
     void Diving(size_t index);
@@ -43,10 +44,10 @@ Type dheap<Type, D>::GetMinimumAndPop()
 }
 
 template<typename Type, size_t D>
-std::string dheap<Type, D>::AsString()
+std::string AsString(const dheap<Type, D>& heap)
 {
     std::stringstream result{};
-    std::copy(m_values.cbegin(), m_values.cend(), std::ostream_iterator<Type>(result, ", "));
+    std::copy(heap.m_values.cbegin(), heap.m_values.cend(), std::ostream_iterator<Type>(result, ", "));
     return result.str();
 }
 

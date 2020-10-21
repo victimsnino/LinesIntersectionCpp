@@ -43,7 +43,7 @@ TEMPLATE_TEST_CASE("Dheap operations works correct", "[dheap]", int, float, Comp
 
     SECTION("Top element is minimum")
     {
-        INFO("Heap: " << heap.AsString());
+        INFO("Heap: " << AsString(heap));
         CHECK(heap.GetMinimumAndPop() == TestType(*std::min_element(elements.cbegin(), elements.cend())));
     }
     SECTION("All elemnts are sorted")
@@ -52,7 +52,7 @@ TEMPLATE_TEST_CASE("Dheap operations works correct", "[dheap]", int, float, Comp
         for (auto value : elements)
         {
             CHECK(heap.GetMinimumAndPop() == TestType(value));
-            UNSCOPED_INFO("After removing " << value << ": " << heap.AsString());
+            UNSCOPED_INFO("After removing " << value << ": " << AsString(heap));
         }
     }
 }
