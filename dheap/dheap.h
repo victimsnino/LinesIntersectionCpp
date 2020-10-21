@@ -13,13 +13,7 @@ public:
 
     Type GetMinimumAndPop();
 
-    std::string AsString()
-    {
-        std::string result{};
-        for (const auto& value : m_values)
-            result += std::to_string(value) + ",";
-        return result;
-    }
+    std::string AsString();
 private:
     void Emersion(size_t index);
     void Diving(size_t index);
@@ -46,6 +40,14 @@ Type dheap<Type, D>::GetMinimumAndPop()
 
     Diving(0);
     return value_to_return;
+}
+
+template<typename Type, size_t D>
+std::string dheap<Type, D>::AsString()
+{
+    std::stringstream result{};
+    std::copy(m_values.cbegin(), m_values.cend(), std::ostream_iterator<Type>(result, ", "));
+    return result.str();
 }
 
 template<typename Type, size_t D>

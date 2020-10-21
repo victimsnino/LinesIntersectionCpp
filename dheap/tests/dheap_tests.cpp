@@ -3,26 +3,55 @@
 
 #include "dheap.h"
 
-TEST_CASE("Dheap operations works correct", "[dheap]")
+#include <ostream>
+
+class ComparableObject
 {
-    dheap<int, 2> heap{};
+public:
+    ComparableObject(double value)
+        : m_value(value) {}
 
-    std::vector<int> elements{ 2, 3, 4, 1, 10, 20 };
-    for (int value : elements)
-        heap.Insert(value);
 
-    INFO("Init" << heap.AsString());
+    friend bool operator==(const ComparableObject& lhs, const ComparableObject& rhs)
+    {
+        return lhs.m_value == rhs.m_value;
+    }
+
+    friend bool operator<(const ComparableObject& lhs, const ComparableObject& rhs)
+    {
+        return lhs.m_value < rhs.m_value;
+    }
+
+    friend bool operator>(const ComparableObject& lhs, const ComparableObject& rhs) { return rhs < lhs; }
+
+    friend std::ostream& operator<<(std::ostream& os, const ComparableObject& obj)
+    {
+        return os << "ComparableObject{" << obj.m_value << "}";
+    }
+
+private:
+    double      m_value;
+};
+
+TEMPLATE_TEST_CASE("Dheap operations works correct", "[dheap]", int, float, ComparableObject)
+{
+    dheap<TestType, 2> heap{};
+
+    std::vector<double> elements{ 2.1, 3.1, 3.05, 4.3, 1.2, 10.31, 20.42 };
+    for (auto value : elements)
+        heap.Insert(TestType(value));
 
     SECTION("Top element is minimum")
     {
-        REQUIRE(heap.GetMinimumAndPop() == *std::min_element(elements.cbegin(), elements.cend()));
+        INFO("Heap: " << heap.AsString());
+        CHECK(heap.GetMinimumAndPop() == TestType(*std::min_element(elements.cbegin(), elements.cend())));
     }
     SECTION("All elemnts are sorted")
     {
         std::sort(elements.begin(), elements.end());
         for (auto value : elements)
         {
-            REQUIRE(heap.GetMinimumAndPop() == value);
+            CHECK(heap.GetMinimumAndPop() == TestType(value));
             UNSCOPED_INFO("After removing " << value << ": " << heap.AsString());
         }
     }
