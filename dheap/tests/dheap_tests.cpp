@@ -62,6 +62,26 @@ TEST_CASE("Make_heap works correct", "[dheap]")
     std::vector<ComparableObject> objects{ 1, 2, 3, 33.3, 0.5 };
     auto heap = dheap<ComparableObject, 2>::MakeHeap(objects);
     std::sort(objects.begin(), objects.end());
-    for (auto& val : objects)
-        CHECK(heap.GetMinimumAndPop() == val);
+
+    SECTION("Elements are equal")
+    {
+        for (auto& val : objects)
+            CHECK(heap.GetMinimumAndPop() == val);
+    }
+
+    SECTION("Insert after pop works correct")
+    {
+        for (int i = 0; i < 2; ++i)
+        {
+            heap.GetMinimumAndPop();
+            objects.erase(std::remove(objects.begin(), objects.end(), objects.front()), objects.end());
+        }
+
+        ComparableObject temp{ 0.3333 };
+        heap.Insert(temp);
+        CHECK(heap.GetMinimumAndPop() == temp);
+
+        for (auto& val : objects)
+            CHECK(heap.GetMinimumAndPop() == val);
+    }
 }
