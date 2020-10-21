@@ -56,3 +56,12 @@ TEMPLATE_TEST_CASE("Dheap operations works correct", "[dheap]", int, float, Comp
         }
     }
 }
+
+TEST_CASE("Make_heap works correct", "[dheap]")
+{
+    std::vector<ComparableObject> objects{ 1, 2, 3, 33.3, 0.5 };
+    auto heap = dheap<ComparableObject, 2>::MakeHeap(objects);
+    std::sort(objects.begin(), objects.end());
+    for (auto& val : objects)
+        CHECK(heap.GetMinimumAndPop() == val);
+}

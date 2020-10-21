@@ -13,6 +13,8 @@ public:
 
     Type GetMinimumAndPop();
 
+    static dheap MakeHeap(std::vector<Type> values);
+
     template<typename Type, size_t D>
     friend std::string AsString(const dheap<Type, D>& heap);
 private:
@@ -41,6 +43,17 @@ Type dheap<Type, D>::GetMinimumAndPop()
 
     Diving(0);
     return value_to_return;
+}
+
+template<typename Type, size_t D>
+dheap<Type, D> dheap<Type, D>::MakeHeap(std::vector<Type> values)
+{
+    dheap<Type, D> heap{};
+
+    for (auto& value : values)
+        heap.Insert(value);
+
+    return heap;
 }
 
 template<typename Type, size_t D>
