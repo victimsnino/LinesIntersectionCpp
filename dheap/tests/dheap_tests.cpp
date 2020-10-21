@@ -11,7 +11,7 @@ TEST_CASE("Dheap operations works correct", "[dheap]")
     for (int value : elements)
         heap.Insert(value);
 
-    UNSCOPED_INFO("Init" << heap.AsString());
+    INFO("Init" << heap.AsString());
 
     SECTION("Top element is minimum")
     {
