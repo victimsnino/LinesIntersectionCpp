@@ -7,10 +7,23 @@ TEST_CASE("Dheap operations works correct", "[dheap]")
 {
     dheap<int, 2> heap{};
 
-    heap.Insert(2);
-    heap.Insert(3);
-    heap.Insert(4);
-    heap.Insert(1);
+    std::vector<int> elements{ 2, 3, 4, 1, 10, 20 };
+    for (int value : elements)
+        heap.Insert(value);
 
-    REQUIRE(heap.GetMinimum() == 1);
+    UNSCOPED_INFO("Init" << heap.AsString());
+
+    SECTION("Top element is minimum")
+    {
+        REQUIRE(heap.GetMinimumAndPop() == *std::min_element(elements.cbegin(), elements.cend()));
+    }
+    SECTION("All elemnts are sorted")
+    {
+        std::sort(elements.begin(), elements.end());
+        for (auto value : elements)
+        {
+            REQUIRE(heap.GetMinimumAndPop() == value);
+            UNSCOPED_INFO("After removing " << value << ": " << heap.AsString());
+        }
+    }
 }
