@@ -11,3 +11,4 @@ SET(UNIT_TESTS ON)
 
 add_subdirectory(catch EXCLUDE_FROM_ALL)
 add_subdirectory(dheap)
+add_subdirectory(avl)

@@ -1,4 +1,4 @@
-set(TARGET dheap)
+set(TARGET avl)
 
 add_library(${TARGET} INTERFACE )
 
@@ -8,7 +8,7 @@ INTERFACE
 )
 
 if (MSVC)
-    add_custom_target(${TARGET}_headers SOURCES dheap.h dheap_utils.h)
+    add_custom_target(${TARGET}_headers SOURCES avl.h avl_node.h)
 endif()
 
 if (UNIT_TESTS)
