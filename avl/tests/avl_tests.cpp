@@ -3,7 +3,35 @@
 
 #include "avl.h"
 
-TEMPLATE_TEST_CASE("AVL rotations works correct", "[avl]", int)
+class ComparableObject
+{
+public:
+    ComparableObject(double value)
+        : m_value(value) {}
+
+
+    friend bool operator==(const ComparableObject& lhs, const ComparableObject& rhs)
+    {
+        return lhs.m_value == rhs.m_value;
+    }
+
+    friend bool operator<(const ComparableObject& lhs, const ComparableObject& rhs)
+    {
+        return lhs.m_value < rhs.m_value;
+    }
+
+    friend bool operator>(const ComparableObject& lhs, const ComparableObject& rhs) { return rhs < lhs; }
+
+    friend std::ostream& operator<<(std::ostream& os, const ComparableObject& obj)
+    {
+        return os << "ComparableObject{" << obj.m_value << "}";
+    }
+
+private:
+    double      m_value;
+};
+
+TEMPLATE_TEST_CASE("AVL rotations works correct", "[avl]", int, double, ComparableObject)
 {
     AVLTree<TestType> tree;
     auto is_value_equal = [](const auto* node, auto value)
