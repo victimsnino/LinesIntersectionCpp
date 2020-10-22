@@ -6,3 +6,5 @@ add_executable(${TARGET}
 
 target_link_libraries(${TARGET} avl catch)
 SET_TARGET_PROPERTIES(${TARGET} PROPERTIES FOLDER "Tests")
+
+add_test(${TARGET} ${TARGET})

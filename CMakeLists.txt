@@ -9,6 +9,8 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 SET(UNIT_TESTS ON)
 
+enable_testing()
+
 add_subdirectory(catch EXCLUDE_FROM_ALL)
 add_subdirectory(dheap)
 add_subdirectory(avl)
