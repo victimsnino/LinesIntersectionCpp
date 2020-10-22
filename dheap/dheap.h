@@ -15,8 +15,8 @@ public:
 
     static dheap MakeHeap(std::vector<Type> values);
 
-    template<typename Type, size_t D>
-    friend std::string AsString(const dheap<Type, D>& heap);
+    template<typename T, size_t DS>
+    friend std::string AsString(const dheap<T, DS>& heap);
 private:
     void Emersion(size_t index);
     void Diving(size_t index);
@@ -56,11 +56,11 @@ dheap<Type, D> dheap<Type, D>::MakeHeap(std::vector<Type> values)
     return heap;
 }
 
-template<typename Type, size_t D>
-std::string AsString(const dheap<Type, D>& heap)
+template<typename T, size_t DS>
+std::string AsString(const dheap<T, DS>& heap)
 {
     std::stringstream result{};
-    std::copy(heap.m_values.cbegin(), heap.m_values.cend(), std::ostream_iterator<Type>(result, ", "));
+    std::copy(heap.m_values.cbegin(), heap.m_values.cend(), std::ostream_iterator<T>(result, ", "));
     return result.str();
 }
 
