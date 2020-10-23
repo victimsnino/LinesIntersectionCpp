@@ -16,10 +16,8 @@ TEST_CASE("Intersection utils works correct", "[intersection]")
          "Coords2: " << second_coordinates.first << "," << second_coordinates.second << "\n" <<
          point_1 << "\n" << point_2);
 
-    CHECK(point_1.GetCoordinates() == (first_coordinates < second_coordinates ? first_coordinates : second_coordinates))
-    ;
-    CHECK(point_2.GetCoordinates() == (first_coordinates < second_coordinates ? second_coordinates : first_coordinates))
-    ;
+    CHECK(point_1.GetCoordinates() == (first_coordinates < second_coordinates ? first_coordinates : second_coordinates));
+    CHECK(point_2.GetCoordinates() == (first_coordinates < second_coordinates ? second_coordinates : first_coordinates));
 
     CHECK(point_1.GetOwnerId() == line_id);
     CHECK(point_2.GetOwnerId() == line_id);
@@ -27,5 +25,5 @@ TEST_CASE("Intersection utils works correct", "[intersection]")
     CHECK(point_1.GetType() == Point::PointType::FirstPoint);
     CHECK(point_2.GetType() == Point::PointType::SecondPoint);
 
-    CHECK((point_1 < point_2) == (point_1.GetCoordinates() < point_2.GetCoordinates()));
+    CHECK(((point_1 < point_2) || (first_coordinates == second_coordinates)) == true);
 }
