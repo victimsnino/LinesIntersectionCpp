@@ -3,20 +3,21 @@
 #include <vector>
 #include "dheap_utils.h"
 
-template<typename Type, size_t D>
+template<typename Type>
 class dheap
 {
 public:
-    dheap() = default;
+    dheap(size_t D)
+        : m_d(D) {}
 
     void Insert(Type value);
 
     Type GetMinimumAndPop();
 
-    static dheap MakeHeap(std::vector<Type> values);
+    static dheap MakeHeap(size_t D, std::vector<Type> values);
 
-    template<typename T, size_t DS>
-    friend std::string AsString(const dheap<T, DS>& heap);
+    template<typename T>
+    friend std::string AsString(const dheap<T>& heap);
 private:
     void Emersion(size_t index);
     void Diving(size_t index);
@@ -24,17 +25,18 @@ private:
     size_t MinChild(size_t index) const;
 private:
     std::vector<Type> m_values{};
+    const size_t      m_d;
 };
 
-template<typename Type, size_t D>
-void dheap<Type, D>::Insert(Type value)
+template<typename Type>
+void dheap<Type>::Insert(Type value)
 {
     m_values.emplace_back(std::move(value));
     Emersion(m_values.size() - 1);
 }
 
-template<typename Type, size_t D>
-Type dheap<Type, D>::GetMinimumAndPop()
+template<typename Type>
+Type dheap<Type>::GetMinimumAndPop()
 {
     auto value_to_return = m_values.front();
 
@@ -45,10 +47,10 @@ Type dheap<Type, D>::GetMinimumAndPop()
     return value_to_return;
 }
 
-template<typename Type, size_t D>
-dheap<Type, D> dheap<Type, D>::MakeHeap(std::vector<Type> values)
+template<typename Type>
+dheap<Type> dheap<Type>::MakeHeap(size_t D, std::vector<Type> values)
 {
-    dheap<Type, D> heap{};
+    dheap<Type> heap{D};
 
     for (auto& value : values)
         heap.Insert(value);
@@ -56,47 +58,47 @@ dheap<Type, D> dheap<Type, D>::MakeHeap(std::vector<Type> values)
     return heap;
 }
 
-template<typename T, size_t DS>
-std::string AsString(const dheap<T, DS>& heap)
+template<typename T>
+std::string AsString(const dheap<T>& heap)
 {
     std::stringstream result{};
     std::copy(heap.m_values.cbegin(), heap.m_values.cend(), std::ostream_iterator<T>(result, ", "));
     return result.str();
 }
 
-template<typename Type, size_t D>
-void dheap<Type, D>::Emersion(size_t index)
+template<typename Type>
+void dheap<Type>::Emersion(size_t index)
 {
-    auto parent_index = dheap_utils::Parent(index, D);
+    auto parent_index = dheap_utils::Parent(index, m_d);
 
     while (index != 0 && m_values[parent_index] > m_values[index])
     {
         std::swap(m_values[parent_index], m_values[index]);
         index        = parent_index;
-        parent_index = dheap_utils::Parent(index, D);
+        parent_index = dheap_utils::Parent(index, m_d);
     }
 }
 
-template<typename Type, size_t D>
-void dheap<Type, D>::Diving(size_t index)
+template<typename Type>
+void dheap<Type>::Diving(size_t index)
 {
     auto min_child_index = MinChild(index);
-    while(min_child_index != 0 && m_values[index] > m_values[min_child_index])
+    while (min_child_index != 0 && m_values[index] > m_values[min_child_index])
     {
         std::swap(m_values[index], m_values[min_child_index]);
-        index = min_child_index;
+        index           = min_child_index;
         min_child_index = MinChild(index);
     }
 }
 
-template<typename Type, size_t D>
-size_t dheap<Type, D>::MinChild(size_t index) const
+template<typename Type>
+size_t dheap<Type>::MinChild(size_t index) const
 {
-    auto left_child = dheap_utils::LeftChild(index, D);
+    auto left_child = dheap_utils::LeftChild(index, m_d);
     if (left_child >= m_values.size())
         return 0;
 
-    auto right_child = dheap_utils::RightChild(index, D, m_values.size());
+    auto right_child = dheap_utils::RightChild(index, m_d, m_values.size());
 
     auto begin = m_values.cbegin();
     auto itr   = std::min_element(begin + left_child, begin + right_child + 1);

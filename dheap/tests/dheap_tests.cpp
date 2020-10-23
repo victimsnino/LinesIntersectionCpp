@@ -35,7 +35,7 @@ private:
 
 TEMPLATE_TEST_CASE("Dheap operations works correct", "[dheap]", int, float, ComparableObject)
 {
-    dheap<TestType, 2> heap{};
+    dheap<TestType> heap{2};
 
     std::vector<double> elements{ 2.1, 3.1, 3.05, 4.3, 1.2, 10.31, 20.42 };
     for (auto value : elements)
@@ -57,10 +57,10 @@ TEMPLATE_TEST_CASE("Dheap operations works correct", "[dheap]", int, float, Comp
     }
 }
 
-TEST_CASE("Make_heap works correct", "[dheap]")
+TEMPLATE_TEST_CASE_SIG("Make_heap works correct with specific D", "[dheap]", ((int D), D), (2),(3), (5))
 {
     std::vector<ComparableObject> objects{ 1, 2, 3, 33.3, 0.5 };
-    auto heap = dheap<ComparableObject, 2>::MakeHeap(objects);
+    auto heap = dheap<ComparableObject>::MakeHeap(D, objects);
     std::sort(objects.begin(), objects.end());
 
     SECTION("Elements are equal")
