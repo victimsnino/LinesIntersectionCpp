@@ -57,6 +57,21 @@ TEST_CASE("Find of intersection naive", "[intersection]")
               {{0, -2}, {5, 1}}},           // 5
 
             {{4, 5}}                        // Indexes
+        },
+        Type{{{{0, 0}, {1, 1}},             // 0
+              {{-1, -1}, {2, 2}}},          // 1
+
+            {{0,1}}                         // Indexes
+        },
+        Type{{{{0, 0}, {5, 0}},             // 0
+              {{0, 1}, {5, 1}}},            // 1
+
+            std::nullopt                    // No Indexes
+        },
+        Type{{{{0, 0}, {5, 0}},             // 0
+              {{1, -1}, {1, 1}}},           // 1
+
+            {{0,1}}                         // Indexes
         }
     );
 
@@ -73,7 +88,7 @@ TEST_CASE("Find of intersection naive", "[intersection]")
         if (intersection.has_value())
         {
             auto [i, j] = intersection.value();
-            UNSCOPED_INFO(" Intersection indexes: " << i << " " << j);
+            UNSCOPED_INFO(" Intersection indexes: " << i << " " << j); 
         }
     };
 
