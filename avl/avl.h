@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include "avl_node.h"
 
 template<typename KeyType>
