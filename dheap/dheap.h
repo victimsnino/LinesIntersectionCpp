@@ -37,7 +37,7 @@ void dheap<Type, D>::Insert(Type value)
 template<typename Type, size_t D>
 Type dheap<Type, D>::GetMinimumAndPop()
 {
-    auto value_to_return = m_values.front();
+    auto value_to_return = std::move(m_values.front());
 
     m_values.front() = std::move(m_values.back());
     m_values.pop_back();
@@ -91,7 +91,7 @@ size_t dheap<Type, D>::MinChild(size_t index) const
 
     auto right_child = dheap_utils::RightChild(index, D, m_values.size());
 
-    auto begin = m_values.cbegin();
-    auto itr   = std::min_element(begin + left_child, begin + right_child + 1);
+    const auto begin = m_values.cbegin();
+    const auto itr   = std::min_element(begin + left_child, begin + right_child + 1);
     return std::distance(begin, itr);
 }
