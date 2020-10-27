@@ -82,7 +82,7 @@ TEST_CASE("Find of intersection naive", "[intersection]")
         lines.emplace_back(line);
     }
 
-    const auto function = GENERATE(/*NaiveFindIntersection,*/ EffectiveFindIntersection);
+    const auto function = GENERATE(NaiveFindIntersection, EffectiveFindIntersection);
     auto res       = function(lines);
     auto print_opt = [](auto intersection, const std::string& name)
     {

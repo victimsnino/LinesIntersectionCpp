@@ -15,6 +15,9 @@ public:
     void Remove(const KeyType& value);
 
     const Node<KeyType>* FindNode(const KeyType& value) const;
+
+    const Node<KeyType>* Next(const KeyType& value) const;
+    const Node<KeyType>* Prev(const KeyType& value) const;
 private:
     Node<KeyType>* m_root = nullptr;
 };

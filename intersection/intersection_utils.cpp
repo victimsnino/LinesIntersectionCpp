@@ -133,7 +133,7 @@ std::optional<std::pair<size_t, size_t>> EffectiveFindIntersection(const std::ve
             const auto* const node_in_tree = tree.FindNode(line);
             assert(node_in_tree);
 
-            for (const auto* target_node : {node_in_tree->GetLeftBaseNode(), node_in_tree->GetRightBaseNode()})
+            for (const auto* target_node : {Node<Line>::Next(node_in_tree), Node<Line>::Prev(node_in_tree)})
             {
                 if (target_node && IsIntersection(target_node->GetValue(), line))
                 {
@@ -145,8 +145,8 @@ std::optional<std::pair<size_t, size_t>> EffectiveFindIntersection(const std::ve
         {
             const auto* const node_in_tree = tree.FindNode(line);
             assert(node_in_tree);
-            if (const auto*     left_node  = node_in_tree->GetLeftBaseNode())
-                if (const auto* right_node = node_in_tree->GetRightBaseNode())
+            if (const auto*     left_node  = Node<Line>::Next(node_in_tree))
+                if (const auto* right_node = Node<Line>::Prev(node_in_tree))
                     if (IsIntersection(left_node->GetValue(), right_node->GetValue()))
                         return ReturnIndexes(left_node->GetValue(), right_node->GetValue(), lines);
             tree.Remove(line);

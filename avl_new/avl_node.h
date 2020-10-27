@@ -19,8 +19,8 @@ public:
 
     static Node<KeyType>* FindNode(Node<KeyType>* node, const KeyType& value);
 
-    static Node<KeyType>* Next(Node<KeyType>* node);
-    static Node<KeyType>* Prev(Node<KeyType>* node);
+    static Node<KeyType>* Next(const Node<KeyType>* node);
+    static Node<KeyType>* Prev(const Node<KeyType>* node);
 private:
     static void           UpdateHeight(Node<KeyType>* node);
     static Node<KeyType>* BalanceIfNeeded(Node<KeyType>* node);
@@ -205,7 +205,7 @@ Node<KeyType>* Node<KeyType>::FindMax(Node<KeyType>* node)
 }
 
 template<typename KeyType>
-Node<KeyType>* Node<KeyType>::Next(Node<KeyType>* node)
+Node<KeyType>* Node<KeyType>::Next(const Node<KeyType>* node)
 {
     if (node->m_right)
         return FindMin(node->m_right);
@@ -220,7 +220,7 @@ Node<KeyType>* Node<KeyType>::Next(Node<KeyType>* node)
 }
 
 template<typename KeyType>
-Node<KeyType>* Node<KeyType>::Prev(Node<KeyType>* node)
+Node<KeyType>* Node<KeyType>::Prev(const Node<KeyType>* node)
 {
     if (node->m_left)
         return FindMax(node->m_left);
