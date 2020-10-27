@@ -62,22 +62,13 @@ private:
 
 struct Line
 {
-    friend bool operator<(const Line& lhs, const Line& rhs)
-    {
-        return std::tie(lhs.first, lhs.second) < std::tie(rhs.first, rhs.second);
-    }
+    friend bool operator<(const Line& lhs, const Line& rhs);
+    friend bool operator>(const Line& lhs, const Line& rhs);
+    friend bool operator==(const Line& lhs, const Line& rhs);
 
-    friend bool operator>(const Line& lhs, const Line& rhs) { return rhs < lhs; }
-
-
-    friend bool operator==(const Line& lhs, const Line& rhs)
-    {
-        return std::tie(lhs.first, lhs.second, lhs.line_id) == std::tie(rhs.first, rhs.second, rhs.line_id);
-    }
-
-    Point       first;
-    Point       second;
-    size_t      line_id;
+    Point  first;
+    Point  second;
+    size_t line_id;
 };
 
 

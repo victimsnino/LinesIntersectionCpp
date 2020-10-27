@@ -1,6 +1,5 @@
 #include "intersection_utils.h"
 
-
 #include "avl.h"
 #include "dheap.h"
 
@@ -61,6 +60,18 @@ std::ostream& operator<<(std::ostream& os, const Point& obj)
             << obj.m_coordinates.first << " y " << obj.m_coordinates.second
             << " m_owner_id: " << obj.m_owner_id
             << " m_type: " << (obj.m_type == Point::PointType::FirstPoint ? "FirstPoint" : "SecondPoint");
+}
+
+bool operator<(const Line& lhs, const Line& rhs)
+{
+    return std::tie(lhs.first, lhs.second) < std::tie(rhs.first, rhs.second);
+}
+
+bool operator>(const Line& lhs, const Line& rhs) { return rhs < lhs; }
+
+bool operator==(const Line& lhs, const Line& rhs)
+{
+    return std::tie(lhs.first, lhs.second, lhs.line_id) == std::tie(rhs.first, rhs.second, rhs.line_id);
 }
 
 
