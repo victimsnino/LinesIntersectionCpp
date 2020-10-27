@@ -4,6 +4,7 @@
 #include "dheap.h"
 
 #include <cassert>
+#include <tuple>
 
 
 Point::Point(const Coords& coordinates, size_t owner_id, PointType type)
