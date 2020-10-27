@@ -114,7 +114,7 @@ static std::pair<size_t, size_t> ReturnIndexes(const Line& first, const Line& se
 
 std::optional<std::pair<size_t, size_t>> EffectiveFindIntersection(const std::vector<Line>& lines)
 {
-    dheap<Point> points{2};
+    dheap<Point, 2> points{};
 
     for (const auto& line : lines)
     {

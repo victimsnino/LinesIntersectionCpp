@@ -35,7 +35,7 @@ private:
 
 TEMPLATE_TEST_CASE("Dheap operations works correct", "[dheap]", int, float, ComparableObject)
 {
-    dheap<TestType> heap{2};
+    dheap<TestType, 2> heap{};
 
     std::vector<double> elements{ 2.1, 3.1, 3.05, 4.3, 1.2, 10.31, 20.42 };
     for (auto value : elements)
@@ -43,7 +43,6 @@ TEMPLATE_TEST_CASE("Dheap operations works correct", "[dheap]", int, float, Comp
 
     SECTION("Top element is minimum")
     {
-        INFO("Heap: " << AsString(heap));
         CHECK(heap.GetMinimumAndPop() == TestType(*std::min_element(elements.cbegin(), elements.cend())));
     }
     SECTION("All elemnts are sorted")
@@ -52,7 +51,7 @@ TEMPLATE_TEST_CASE("Dheap operations works correct", "[dheap]", int, float, Comp
         for (auto value : elements)
         {
             CHECK(heap.GetMinimumAndPop() == TestType(value));
-            UNSCOPED_INFO("After removing " << value << ": " << AsString(heap));
+            UNSCOPED_INFO("After removing " << value);
         }
     }
 }
@@ -60,7 +59,7 @@ TEMPLATE_TEST_CASE("Dheap operations works correct", "[dheap]", int, float, Comp
 TEMPLATE_TEST_CASE_SIG("Make_heap works correct with specific D", "[dheap]", ((int D), D), (2),(3), (5))
 {
     std::vector<ComparableObject> objects{ 1, 2, 3, 33.3, 0.5 };
-    auto heap = dheap<ComparableObject>::MakeHeap(D, objects);
+    auto heap = dheap<ComparableObject, D>::MakeHeap(objects);
     std::sort(objects.begin(), objects.end());
 
     SECTION("Elements are equal")
