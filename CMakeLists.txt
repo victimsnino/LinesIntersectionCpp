@@ -13,5 +13,5 @@ enable_testing()
 
 add_subdirectory(catch EXCLUDE_FROM_ALL)
 add_subdirectory(dheap)
-add_subdirectory(avl)
+add_subdirectory(avl_new)
 add_subdirectory(intersection)
