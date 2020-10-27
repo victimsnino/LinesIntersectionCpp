@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 
 template<typename KeyType>
 struct Node
@@ -7,6 +8,11 @@ public:
     Node(Node<KeyType>* parent, KeyType&& value)
         : m_value(std::move(value))
         , m_parent(parent) {}
+
+    const KeyType& GetValue() const { return m_value; }
+
+    const Node<KeyType>* GetLeft() const { return m_left; }
+    const Node<KeyType>* GetRight() const { return m_right; }
 
     static Node<KeyType>* Insert(Node<KeyType>* node, KeyType&& value);
     static Node<KeyType>* Remove(Node<KeyType>* node, const KeyType& value);
@@ -19,8 +25,8 @@ private:
     static void           UpdateHeight(Node<KeyType>* node);
     static Node<KeyType>* BalanceIfNeeded(Node<KeyType>* node);
 
-    static size_t GetHeight(Node<KeyType>* node) { return node ? node->m_height : 0; };
-    static int    GetDiffHeights(Node<KeyType>* node) { return GetHeight(node->m_right) - GetHeight(node->m_left); }
+    static int GetHeight(Node<KeyType>* node) { return node ? node->m_height : 0; };
+    static int GetDiffHeights(Node<KeyType>* node) { return GetHeight(node->m_right) - GetHeight(node->m_left); }
 
     static Node<KeyType>* LeftRotation(Node<KeyType>* node);
     static Node<KeyType>* RightRotation(Node<KeyType>* node);
@@ -38,7 +44,7 @@ private:
     Node<KeyType>* m_right{};
     Node<KeyType>* m_parent{};
 
-    size_t m_height = 0;
+    int m_height = 1;
 };
 
 template<typename KeyType>
@@ -52,7 +58,7 @@ Node<KeyType>* Node<KeyType>::Insert(Node<KeyType>* node, KeyType&& value)
     else if (node->m_value < value)
         node->m_right = Insert(node->m_right, std::move(value));
     else
-        assert(value);
+        assert(nullptr);
 
     return BalanceIfNeeded(node);
 }
@@ -131,11 +137,11 @@ Node<KeyType>* Node<KeyType>::BalanceIfNeeded(Node<KeyType>* node)
 
     if (diff_heights == 2) // right > left
     {
-        if (GetDiffHeight(node->m_right) >= 0) // right subtree: right >= left
+        if (GetDiffHeights(node->m_right) >= 0) // right subtree: right >= left
             return LeftRotation(node);
         return BigLeftRotation(node);
     }
-    if (GetDiffHeight(node->m_left) <= 0) // left <= right
+    if (GetDiffHeights(node->m_left) <= 0) // left <= right
         return RightRotation(node);
     return BigRightRotation(node);
 }
@@ -204,8 +210,8 @@ Node<KeyType>* Node<KeyType>::Next(Node<KeyType>* node)
     if (node->m_right)
         return FindMin(node->m_right);
 
-    auto parent = node->m_parent;
-    while (parent != nullptr && parent.right == node)
+    Node<KeyType>* parent = node->m_parent;
+    while (parent != nullptr && parent->m_right == node)
     {
         node   = parent;
         parent = node->m_parent;
@@ -219,8 +225,8 @@ Node<KeyType>* Node<KeyType>::Prev(Node<KeyType>* node)
     if (node->m_left)
         return FindMax(node->m_left);
 
-    auto parent = node->m_parent;
-    while (parent != nullptr && parent.left == node)
+    Node<KeyType>* parent = node->m_parent;
+    while (parent != nullptr && parent->m_left == node)
     {
         node   = parent;
         parent = node->m_parent;
