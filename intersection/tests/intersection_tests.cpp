@@ -9,7 +9,7 @@ TEST_CASE("Intersection utils works correct", "[intersection]")
     auto second_coordinates = GENERATE(as<Coords>{}, Coords(0,0), Coords(1, 0), Coords(0, 2));
     auto line_id            = GENERATE(as<size_t>{}, 1, 2);
 
-    auto [point_1, point_2] = Point::MakeLine(first_coordinates, second_coordinates, line_id);
+    auto [point_1, point_2, _] = Point::MakeLine(first_coordinates, second_coordinates, line_id);
     INFO("Coords1: " << first_coordinates.first << "," << first_coordinates.second << "\n" <<
          "Coords2: " << second_coordinates.first << "," << second_coordinates.second << "\n" <<
          point_1 << "\n" << point_2);
@@ -28,8 +28,6 @@ TEST_CASE("Intersection utils works correct", "[intersection]")
 
 TEST_CASE("Find of intersection naive", "[intersection]")
 {
-    std::vector<Line> lines;
-
     using Type = std::pair<std::vector<std::pair<Coords, Coords>>, std::optional<std::pair<size_t, size_t>>>;
 
     auto [raw_data, intersection]= GENERATE(as<Type>{}, 
@@ -75,13 +73,17 @@ TEST_CASE("Find of intersection naive", "[intersection]")
         }
     );
 
+
+    std::vector<Line> lines;
+
     for (const auto& [coords_1, coords_2] : raw_data)
     {
         auto line = Point::MakeLine(coords_1, coords_2, lines.size());
         lines.emplace_back(line);
     }
 
-    auto res = NaiveFindIntersection(lines);
+    const auto function = GENERATE(/*NaiveFindIntersection,*/ EffectiveFindIntersection);
+    auto res       = function(lines);
     auto print_opt = [](auto intersection, const std::string& name)
     {
         UNSCOPED_INFO(name << " intersection exist: " << std::boolalpha << !!intersection);

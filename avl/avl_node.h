@@ -37,6 +37,7 @@ struct Node : public BaseNode<KeyType>
     using BaseNode<KeyType>::BaseNode;
 
     Node* Insert(KeyType value);
+    Node* Remove(const KeyType& value);
 private:
     Node* BalanceIfNeeded();
     void  UpdateHeight();
@@ -48,6 +49,9 @@ private:
     {
         return GetHeight(BaseNode<KeyType>::GetRightNode()) - GetHeight(BaseNode<KeyType>::GetLeftNode());
     }
+
+    Node* FindMinInSubtree();
+    Node* RemoveMinFromSubtreeAndReturnRestSubtree();
 
     static int GetHeight(Node* node) { return node ? node->m_height : 0; }
 
@@ -65,6 +69,44 @@ Node<KeyType>* Node<KeyType>::Insert(KeyType value)
         ptr = new Node<KeyType>(std::move(value));
     else
         ptr = ptr->Insert(std::move(value));
+
+    return BalanceIfNeeded();
+}
+
+template<typename KeyType>
+Node<KeyType>* Node<KeyType>::Remove(const KeyType& value)
+{
+    if (value < BaseNode<KeyType>::GetValue())
+    {
+        if (auto& left_node = BaseNode<KeyType>::GetLeftNode())
+            left_node = left_node->Remove(value);
+    }
+    else if (value > BaseNode<KeyType>::GetValue())
+    {
+        if (auto& right_node = BaseNode<KeyType>::GetRightNode())
+            right_node = right_node->Remove(value);
+    }
+    else // value == GetValue()
+    {
+        Node<KeyType>* left_node{};
+        Node<KeyType>* right_node{};
+        std::swap(BaseNode<KeyType>::GetLeftNode(), left_node);
+        std::swap(BaseNode<KeyType>::GetRightNode(), right_node);
+
+        delete this;
+
+        if (!right_node)
+            return left_node;
+
+        if (!left_node)
+            return right_node;
+
+        auto min_in_right            = right_node->FindMinInSubtree(); // new node instead of current
+        min_in_right->GetRightNode() = right_node->RemoveMinFromSubtreeAndReturnRestSubtree();
+        min_in_right->GetLeftNode()  = left_node;
+
+        return min_in_right->BalanceIfNeeded();
+    }
 
     return BalanceIfNeeded();
 }
@@ -119,4 +161,24 @@ Node<KeyType>* Node<KeyType>::RotateRight()
     UpdateHeight();
     left_child->UpdateHeight();
     return left_child;
+}
+
+template<typename KeyType>
+Node<KeyType>* Node<KeyType>::FindMinInSubtree()
+{
+    if (auto left = BaseNode<KeyType>::GetLeftNode())
+        return left->FindMinInSubtree();
+    return this;
+}
+
+template<typename KeyType>
+Node<KeyType>* Node<KeyType>::RemoveMinFromSubtreeAndReturnRestSubtree()
+{
+    if (auto& left = BaseNode<KeyType>::GetLeftNode())
+    {
+        left = left->RemoveMinFromSubtreeAndReturnRestSubtree();
+        return BalanceIfNeeded();
+    }
+
+    return BaseNode<KeyType>::GetRightNode(); // This node is min -> ok, only returns right subtree
 }

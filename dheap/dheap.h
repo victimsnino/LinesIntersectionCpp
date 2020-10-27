@@ -1,7 +1,10 @@
 #pragma once
 
-#include <vector>
 #include "dheap_utils.h"
+
+#include <algorithm>
+#include <string>
+#include <vector>
 
 template<typename Type>
 class dheap
@@ -13,6 +16,7 @@ public:
     void Insert(Type value);
 
     Type GetMinimumAndPop();
+    bool Empty() const { return m_values.empty(); }
 
     static dheap MakeHeap(size_t D, std::vector<Type> values);
 

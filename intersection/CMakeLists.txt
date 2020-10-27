@@ -8,6 +8,7 @@ target_include_directories(${TARGET}
 PUBLIC
     .
 )
+target_link_libraries(${TARGET} PUBLIC avl dheap)
 
 if (UNIT_TESTS)
     add_subdirectory(tests)

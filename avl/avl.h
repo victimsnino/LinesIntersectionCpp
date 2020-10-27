@@ -12,6 +12,8 @@ public:
     }
 
     void Insert(KeyType value);
+    void Remove(const KeyType& value);
+
     const BaseNode<KeyType>* FindNode(const KeyType& value) const;
 private:
     Node<KeyType>* m_root = nullptr;
@@ -24,6 +26,15 @@ void AVLTree<KeyType>::Insert(KeyType value)
         m_root = m_root->Insert(std::move(value));
     else
         m_root = new Node<KeyType>(std::move(value));
+}
+
+template<typename KeyType>
+void AVLTree<KeyType>::Remove(const KeyType& value)
+{
+    if (!m_root)
+        return;
+
+    m_root = m_root->Remove(value);
 }
 
 template<typename KeyType>

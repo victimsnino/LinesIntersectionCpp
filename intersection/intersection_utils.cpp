@@ -1,6 +1,12 @@
 #include "intersection_utils.h"
 
 
+#include "avl.h"
+#include "dheap.h"
+
+#include <cassert>
+
+
 Point::Point(const Coords& coordinates, size_t owner_id, PointType type)
     : m_coordinates(coordinates)
     , m_owner_id(owner_id)
@@ -16,6 +22,13 @@ bool Point::operator>(const Point& other) const
     return m_coordinates > other.m_coordinates;
 }
 
+bool Point::operator==(const Point& other) const
+{
+    return std::tie(m_coordinates, m_owner_id, m_type) == std::tie(other.m_coordinates,
+                                                                   other.m_owner_id,
+                                                                   other.m_type);
+}
+
 Line Point::MakeLine(const Coords& first_point,
                      const Coords& second_point,
                      size_t        line_id)
@@ -23,7 +36,7 @@ Line Point::MakeLine(const Coords& first_point,
     const auto& first  = first_point < second_point ? first_point : second_point;
     const auto& second = first_point < second_point ? second_point : first_point;
 
-    return {Point(first, line_id, PointType::FirstPoint), Point(second, line_id, PointType::SecondPoint)};
+    return {Point(first, line_id, PointType::FirstPoint), Point(second, line_id, PointType::SecondPoint), line_id};
 }
 
 const Coords& Point::GetCoordinates() const
@@ -76,7 +89,7 @@ bool IsIntersection(const Line& line_1, const Line& line_2)
     return (0 <= Ua && Ua <= 1 && 0 <= Ub && Ub <= 1);
 }
 
-std::optional<std::pair<size_t, size_t>> NaiveFindIntersection(std::vector<Line> lines)
+std::optional<std::pair<size_t, size_t>> NaiveFindIntersection(const std::vector<Line>& lines)
 {
     for (size_t i = 0; i < lines.size() - 1; ++i)
     {
@@ -84,6 +97,59 @@ std::optional<std::pair<size_t, size_t>> NaiveFindIntersection(std::vector<Line>
         {
             if (IsIntersection(lines[i], lines[j]))
                 return std::make_pair(i, j);
+        }
+    }
+    return std::nullopt;
+}
+
+static std::pair<size_t, size_t> ReturnIndexes(const Line& first, const Line& second, const std::vector<Line>& lines)
+{
+    const auto first_index  = std::distance(lines.cbegin(), std::find(lines.cbegin(), lines.cend(), first));
+    const auto second_index = std::distance(lines.cbegin(), std::find(lines.cbegin(), lines.cend(), second));
+
+    auto first_in_result  = std::min(first_index, second_index);
+    auto second_in_result = std::max(first_index, second_index);
+    return {first_in_result, second_in_result};
+}
+
+std::optional<std::pair<size_t, size_t>> EffectiveFindIntersection(const std::vector<Line>& lines)
+{
+    dheap<Point> points{2};
+
+    for (const auto& line : lines)
+    {
+        points.Insert(line.first);
+        points.Insert(line.second);
+    }
+
+    AVLTree<Line> tree{};
+    while (!points.Empty())
+    {
+        const auto  point = points.GetMinimumAndPop();
+        const auto& line  = lines[point.GetOwnerId()];
+        if (point.GetType() == Point::PointType::FirstPoint)
+        {
+            tree.Insert(line);
+            const auto* const node_in_tree = tree.FindNode(line);
+            assert(node_in_tree);
+
+            for (const auto* target_node : {node_in_tree->GetLeftBaseNode(), node_in_tree->GetRightBaseNode()})
+            {
+                if (target_node && IsIntersection(target_node->GetValue(), line))
+                {
+                    return ReturnIndexes(target_node->GetValue(), line, lines);
+                }
+            }
+        }
+        else
+        {
+            const auto* const node_in_tree = tree.FindNode(line);
+            assert(node_in_tree);
+            if (const auto*     left_node  = node_in_tree->GetLeftBaseNode())
+                if (const auto* right_node = node_in_tree->GetRightBaseNode())
+                    if (IsIntersection(left_node->GetValue(), right_node->GetValue()))
+                        return ReturnIndexes(left_node->GetValue(), right_node->GetValue(), lines);
+            tree.Remove(line);
         }
     }
     return std::nullopt;
