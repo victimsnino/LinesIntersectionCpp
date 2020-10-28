@@ -60,17 +60,17 @@ TEMPLATE_TEST_CASE("AVL rotations works correct", "[avl]", int, double, Comparab
             auto node = tree.FindNode(values[indexes[0]]);
             is_value_equal(node, values[indexes[0]]);
 
-            auto left_node = node->GetLeftBaseNode();
+            auto left_node = node->GetLeft();
             is_value_equal(left_node, values[indexes[1]]);
 
-            auto right_node = node->GetRightBaseNode();
+            auto right_node = node->GetRight();
             is_value_equal(right_node, values[indexes[2]]);
 
-            is_null(left_node->GetLeftBaseNode());
-            is_null(left_node->GetRightBaseNode());
+            is_null(left_node->GetLeft());
+            is_null(left_node->GetRight());
 
-            is_null(right_node->GetLeftBaseNode());
-            is_null(right_node->GetRightBaseNode());
+            is_null(right_node->GetLeft());
+            is_null(right_node->GetRight());
 
             is_null(tree.FindNode(4));
         };
@@ -114,10 +114,10 @@ TEMPLATE_TEST_CASE("AVL rotations works correct", "[avl]", int, double, Comparab
             auto node = tree.FindNode(values[1]);
             is_value_equal(node, values[1]);
 
-            auto left_node = node->GetLeftBaseNode();
+            auto left_node = node->GetLeft();
             is_null(left_node);
 
-            auto right_node = node->GetRightBaseNode();
+            auto right_node = node->GetRight();
             is_value_equal(right_node, values[2]);
         }
         SECTION("Remove right child")
@@ -126,10 +126,10 @@ TEMPLATE_TEST_CASE("AVL rotations works correct", "[avl]", int, double, Comparab
             auto node = tree.FindNode(values[1]);
             is_value_equal(node, values[1]);
 
-            auto left_node = node->GetLeftBaseNode();
+            auto left_node = node->GetLeft();
             is_value_equal(left_node, values[0]);
 
-            auto right_node = node->GetRightBaseNode();
+            auto right_node = node->GetRight();
             is_null(right_node);
         }
         SECTION("Remove root")
@@ -142,10 +142,10 @@ TEMPLATE_TEST_CASE("AVL rotations works correct", "[avl]", int, double, Comparab
             auto node = tree.FindNode(values[2]);
             is_value_equal(node, values[2]);
 
-            auto left_node = node->GetLeftBaseNode();
+            auto left_node = node->GetLeft();
             is_value_equal(left_node, values[0]);
 
-            auto right_node = node->GetRightBaseNode();
+            auto right_node = node->GetRight();
             is_null(right_node);
         }
         SECTION("Deeper tree")
@@ -167,14 +167,14 @@ TEMPLATE_TEST_CASE("AVL rotations works correct", "[avl]", int, double, Comparab
 
             auto node = tree.FindNode(values[1]);
 
-            auto right = node->GetRightBaseNode();
+            auto right = node->GetRight();
             is_value_equal(right, values[7]);
 
-            is_value_equal(right->GetLeftBaseNode(), values[5]);
-            auto right_of_right = right->GetRightBaseNode();
+            is_value_equal(right->GetLeft(), values[5]);
+            auto right_of_right = right->GetRight();
             is_value_equal(right_of_right, values[6]);
 
-            is_null(right_of_right->GetLeftBaseNode());
+            is_null(right_of_right->GetLeft());
         }
     }
 }

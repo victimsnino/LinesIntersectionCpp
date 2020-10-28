@@ -1,184 +1,235 @@
 #pragma once
-#include <memory>
+#include <cassert>
 
 template<typename KeyType>
-struct Node;
-
-template<typename KeyType>
-struct BaseNode
+struct Node
 {
 public:
-    BaseNode(KeyType value)
-        : m_value(value) {}
+    Node(Node<KeyType>* parent, KeyType&& value)
+        : m_value(std::move(value))
+        , m_parent(parent) {}
 
-    virtual ~BaseNode()
-    {
-        delete m_left;
-        delete m_right;
-    }
+    const KeyType& GetValue() const { return m_value; }
 
-    const BaseNode* GetLeftBaseNode() const { return m_left; }
-    const BaseNode* GetRightBaseNode() const { return m_right; }
-    const KeyType&  GetValue() const { return m_value; }
+    const Node<KeyType>* GetLeft() const { return m_left; }
+    const Node<KeyType>* GetRight() const { return m_right; }
 
-protected:
-    Node<KeyType>*& GetLeftNode() { return m_left; }
-    Node<KeyType>*& GetRightNode() { return m_right; }
+    static Node<KeyType>* Insert(Node<KeyType>* node, KeyType&& value);
+    static Node<KeyType>* Remove(Node<KeyType>* node, const KeyType& value);
+
+    static Node<KeyType>* FindNode(Node<KeyType>* node, const KeyType& value);
+
+    static Node<KeyType>* Next(const Node<KeyType>* node);
+    static Node<KeyType>* Prev(const Node<KeyType>* node);
+private:
+    static void           UpdateHeight(Node<KeyType>* node);
+    static Node<KeyType>* BalanceIfNeeded(Node<KeyType>* node);
+
+    static int GetHeight(Node<KeyType>* node) { return node ? node->m_height : 0; };
+    static int GetDiffHeights(Node<KeyType>* node) { return GetHeight(node->m_right) - GetHeight(node->m_left); }
+
+    static Node<KeyType>* LeftRotation(Node<KeyType>* node);
+    static Node<KeyType>* RightRotation(Node<KeyType>* node);
+
+    static Node<KeyType>* BigLeftRotation(Node<KeyType>* node);
+    static Node<KeyType>* BigRightRotation(Node<KeyType>* node);
+
+    static Node<KeyType>* FindMin(Node<KeyType>* node);
+    static Node<KeyType>* FindMax(Node<KeyType>* node);
 
 private:
-    const KeyType  m_value;
-    Node<KeyType>* m_left  = nullptr;
-    Node<KeyType>* m_right = nullptr;
-};
+    KeyType m_value;
 
-template<typename KeyType>
-struct Node : public BaseNode<KeyType>
-{
-    using BaseNode<KeyType>::BaseNode;
+    Node<KeyType>* m_left{};
+    Node<KeyType>* m_right{};
+    Node<KeyType>* m_parent{};
 
-    Node* Insert(KeyType value);
-    Node* Remove(const KeyType& value);
-private:
-    Node* BalanceIfNeeded();
-    void  UpdateHeight();
-
-    Node* RotateLeft();
-    Node* RotateRight();
-
-    int GetDiffHeight()
-    {
-        return GetHeight(BaseNode<KeyType>::GetRightNode()) - GetHeight(BaseNode<KeyType>::GetLeftNode());
-    }
-
-    Node* FindMinInSubtree();
-    Node* RemoveMinFromSubtreeAndReturnRestSubtree();
-
-    static int GetHeight(Node* node) { return node ? node->m_height : 0; }
-
-private:
     int m_height = 1;
 };
 
 template<typename KeyType>
-Node<KeyType>* Node<KeyType>::Insert(KeyType value)
+Node<KeyType>* Node<KeyType>::Insert(Node<KeyType>* node, KeyType&& value)
 {
-    auto& ptr = value < BaseNode<KeyType>::GetValue() ?
-                    BaseNode<KeyType>::GetLeftNode() :
-                    BaseNode<KeyType>::GetRightNode();
-    if (!ptr)
-        ptr = new Node<KeyType>(std::move(value));
+    if (!node)
+        return new Node<KeyType>(node, std::move(value));
+
+    if (value < node->m_value)
+        node->m_left = Insert(node->m_left, std::move(value));
+    else if (node->m_value < value)
+        node->m_right = Insert(node->m_right, std::move(value));
     else
-        ptr = ptr->Insert(std::move(value));
+        assert(nullptr);
 
-    return BalanceIfNeeded();
+    return BalanceIfNeeded(node);
 }
 
 template<typename KeyType>
-Node<KeyType>* Node<KeyType>::Remove(const KeyType& value)
+Node<KeyType>* Node<KeyType>::Remove(Node<KeyType>* node, const KeyType& value)
 {
-    if (value < BaseNode<KeyType>::GetValue())
+    if (!node)
+        return nullptr;
+
+    if (value < node->m_value)
+        node->m_left = Remove(node->m_left, value);
+    else if (node->m_value < value)
+        node->m_right = Remove(node->m_right, value);
+    else
     {
-        if (auto& left_node = BaseNode<KeyType>::GetLeftNode())
-            left_node = left_node->Remove(value);
+        Node<KeyType>* left_node  = node->m_left;
+        Node<KeyType>* right_node = node->m_right;
+
+        if (right_node)
+        {
+            Node<KeyType>* y = Next(node);
+            node->m_value    = y->m_value;
+            node->m_right    = Remove(node->m_right, y->m_value);
+        }
+        else if (left_node)
+        {
+            Node<KeyType>* y = Prev(node);
+            node->m_value    = y->m_value;
+            node->m_right    = Remove(node->m_left, y->m_value);
+        }
+        else
+        {
+            delete node;
+            return nullptr;
+        }
     }
-    else if (value > BaseNode<KeyType>::GetValue())
-    {
-        if (auto& right_node = BaseNode<KeyType>::GetRightNode())
-            right_node = right_node->Remove(value);
-    }
-    else // value == GetValue()
-    {
-        Node<KeyType>* left_node{};
-        Node<KeyType>* right_node{};
-        std::swap(BaseNode<KeyType>::GetLeftNode(), left_node);
-        std::swap(BaseNode<KeyType>::GetRightNode(), right_node);
-
-        delete this;
-
-        if (!right_node)
-            return left_node;
-
-        if (!left_node)
-            return right_node;
-
-        auto min_in_right            = right_node->FindMinInSubtree(); // new node instead of current
-        min_in_right->GetRightNode() = right_node->RemoveMinFromSubtreeAndReturnRestSubtree();
-        min_in_right->GetLeftNode()  = left_node;
-
-        return min_in_right->BalanceIfNeeded();
-    }
-
-    return BalanceIfNeeded();
+    return BalanceIfNeeded(node);
 }
 
 template<typename KeyType>
-void Node<KeyType>::UpdateHeight()
+Node<KeyType>* Node<KeyType>::FindNode(Node<KeyType>* node, const KeyType& value)
 {
-    m_height = std::max(GetHeight(BaseNode<KeyType>::GetLeftNode()), GetHeight(BaseNode<KeyType>::GetRightNode())) + 1;
+    if (!node)
+        return nullptr;
+
+    if (value < node->m_value)
+        return FindNode(node->m_left, value);
+
+    if (node->m_value < value)
+        return FindNode(node->m_right, value);
+
+    return node;
 }
 
 template<typename KeyType>
-Node<KeyType>* Node<KeyType>::BalanceIfNeeded()
+void Node<KeyType>::UpdateHeight(Node<KeyType>* node)
 {
-    UpdateHeight();
-    const auto diff_heights = GetDiffHeight();
-    if (abs(diff_heights) < 2)
-        return this;
+    node->m_height = std::max(GetHeight(node->m_left), GetHeight(node->m_right)) + 1;
 
-    if (diff_heights == 2) // right child height > left child
+    if (auto target = node->m_left)
+        target->m_parent = node;
+
+    if (auto target = node->m_right)
+        target->m_parent = node;
+}
+
+template<typename KeyType>
+Node<KeyType>* Node<KeyType>::BalanceIfNeeded(Node<KeyType>* node)
+{
+    UpdateHeight(node);
+
+    auto diff_heights = GetDiffHeights(node);
+    if (abs(diff_heights) < 2) // all is fine
+        return node;
+
+    if (diff_heights == 2) // right > left
     {
-        Node<KeyType>*& right_node = BaseNode<KeyType>::GetRightNode();
-        if (right_node->GetDiffHeight() < 0)
-            // his left is longer, then we need to do big left rotate (rotate right child  right and then left self)
-            right_node = right_node->RotateRight();
-        return RotateLeft();
+        if (GetDiffHeights(node->m_right) >= 0) // right subtree: right >= left
+            return LeftRotation(node);
+        return BigLeftRotation(node);
     }
-    Node<KeyType>*& left_node = BaseNode<KeyType>::GetLeftNode();
-    if (left_node->GetDiffHeight() > 0)
-        left_node = left_node->RotateLeft();
-    return RotateRight();
+    if (GetDiffHeights(node->m_left) <= 0) // left <= right
+        return RightRotation(node);
+    return BigRightRotation(node);
 }
 
 template<typename KeyType>
-Node<KeyType>* Node<KeyType>::RotateLeft()
+Node<KeyType>* Node<KeyType>::LeftRotation(Node<KeyType>* node)
 {
-    Node<KeyType>* right_child                    = BaseNode<KeyType>::GetRightNode();
-    BaseNode<KeyType>::GetRightNode()             = right_child->BaseNode<KeyType>::GetLeftNode();
-    right_child->BaseNode<KeyType>::GetLeftNode() = this;
+    Node<KeyType>* right_child = node->m_right;
+    node->m_right              = right_child->m_left;
+    right_child->m_left        = node;
 
-    UpdateHeight();
-    right_child->UpdateHeight();
+    UpdateHeight(node);
+    UpdateHeight(right_child);
     return right_child;
 }
 
 template<typename KeyType>
-Node<KeyType>* Node<KeyType>::RotateRight()
+Node<KeyType>* Node<KeyType>::RightRotation(Node<KeyType>* node)
 {
-    Node<KeyType>* left_child                     = BaseNode<KeyType>::GetLeftNode();
-    BaseNode<KeyType>::GetLeftNode()              = left_child->BaseNode<KeyType>::GetRightNode();
-    left_child->BaseNode<KeyType>::GetRightNode() = this;
+    Node<KeyType>* left_child = node->m_left;
+    node->m_left              = left_child->m_right;
+    left_child->m_right       = node;
 
-    UpdateHeight();
-    left_child->UpdateHeight();
+    UpdateHeight(node);
+    UpdateHeight(left_child);
     return left_child;
 }
 
 template<typename KeyType>
-Node<KeyType>* Node<KeyType>::FindMinInSubtree()
+Node<KeyType>* Node<KeyType>::BigLeftRotation(Node<KeyType>* node)
 {
-    if (auto left = BaseNode<KeyType>::GetLeftNode())
-        return left->FindMinInSubtree();
-    return this;
+    node->m_right = RightRotation(node->m_right);
+    return LeftRotation(node);
 }
 
 template<typename KeyType>
-Node<KeyType>* Node<KeyType>::RemoveMinFromSubtreeAndReturnRestSubtree()
+Node<KeyType>* Node<KeyType>::BigRightRotation(Node<KeyType>* node)
 {
-    if (auto& left = BaseNode<KeyType>::GetLeftNode())
-    {
-        left = left->RemoveMinFromSubtreeAndReturnRestSubtree();
-        return BalanceIfNeeded();
-    }
+    node->m_left = LeftRotation(node->m_left);
+    return RightRotation(node);
+}
 
-    return BaseNode<KeyType>::GetRightNode(); // This node is min -> ok, only returns right subtree
+template<typename KeyType>
+Node<KeyType>* Node<KeyType>::FindMin(Node<KeyType>* node)
+{
+    while (node->m_left != nullptr)
+    {
+        node = node->m_left;
+    }
+    return node;
+}
+
+template<typename KeyType>
+Node<KeyType>* Node<KeyType>::FindMax(Node<KeyType>* node)
+{
+    while (node->m_right != nullptr)
+    {
+        node = node->m_right;
+    }
+    return node;
+}
+
+template<typename KeyType>
+Node<KeyType>* Node<KeyType>::Next(const Node<KeyType>* node)
+{
+    if (node->m_right)
+        return FindMin(node->m_right);
+
+    Node<KeyType>* parent = node->m_parent;
+    while (parent != nullptr && parent->m_right == node)
+    {
+        node   = parent;
+        parent = node->m_parent;
+    }
+    return parent;
+}
+
+template<typename KeyType>
+Node<KeyType>* Node<KeyType>::Prev(const Node<KeyType>* node)
+{
+    if (node->m_left)
+        return FindMax(node->m_left);
+
+    Node<KeyType>* parent = node->m_parent;
+    while (parent != nullptr && parent->m_left == node)
+    {
+        node   = parent;
+        parent = node->m_parent;
+    }
+    return parent;
 }

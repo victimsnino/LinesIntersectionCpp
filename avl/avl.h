@@ -14,7 +14,10 @@ public:
     void Insert(KeyType value);
     void Remove(const KeyType& value);
 
-    const BaseNode<KeyType>* FindNode(const KeyType& value) const;
+    const Node<KeyType>* FindNode(const KeyType& value) const;
+
+    const Node<KeyType>* Next(const KeyType& value) const;
+    const Node<KeyType>* Prev(const KeyType& value) const;
 private:
     Node<KeyType>* m_root = nullptr;
 };
@@ -22,32 +25,17 @@ private:
 template<typename KeyType>
 void AVLTree<KeyType>::Insert(KeyType value)
 {
-    if (m_root)
-        m_root = m_root->Insert(std::move(value));
-    else
-        m_root = new Node<KeyType>(std::move(value));
+    m_root = Node<KeyType>::Insert(m_root, std::move(value));
 }
 
 template<typename KeyType>
 void AVLTree<KeyType>::Remove(const KeyType& value)
 {
-    if (!m_root)
-        return;
-
-    m_root = m_root->Remove(value);
+    m_root = Node<KeyType>::Remove(m_root, value);
 }
 
 template<typename KeyType>
-const BaseNode<KeyType>* AVLTree<KeyType>::FindNode(const KeyType& value) const
+const Node<KeyType>* AVLTree<KeyType>::FindNode(const KeyType& value) const
 {
-    const BaseNode<KeyType>* current = m_root;
-    while(current)
-    {
-        const auto& cur_value = current->GetValue();
-        if (cur_value == value)
-            return current;
-
-        current = value < cur_value ? current->GetLeftBaseNode() : current->GetRightBaseNode();
-    }
-    return nullptr;
+    return Node<KeyType>::FindNode(m_root, value);
 }
